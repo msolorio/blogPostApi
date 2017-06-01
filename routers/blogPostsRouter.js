@@ -14,10 +14,14 @@ router.get('/', (request, response) => {
 });
 
 router.post('/', jsonParser, (request, response) => {
-  const { title, content, author, publishDate } = request.body;
 
-  const post = BlogPosts.create(title, content, author, publishDate);
-  response.status(200).json(post);
+  try {
+    const post = BlogPosts.create(request.body);
+    response.status(200).json(post);
+  }
+  catch(error) {
+    response.status(400).json({message: error.message, name: error.name});
+  }
 });
 
 router.put('/:id', jsonParser, (request, response) => {

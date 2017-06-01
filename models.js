@@ -16,7 +16,23 @@ function StorageException(message) {
 }
 
 const BlogPosts = {
-  create: function(title, content, author, publishDate) {
+  create: function(newPost) {
+
+    const requiredFields = [
+      'title',
+      'content',
+      'author'
+    ];
+
+    // return first non existant required field in newPost
+    const missingField = requiredFields.find(field => !newPost[field]);
+
+    if (missingField) {
+      throw new StorageException(`\`${missingField}\` is missing from request body.`);
+    }
+
+    const { title, content, author, publishDate } = newPost;
+
     const post = {
       id: uuid.v4(),
       title: title,
@@ -40,9 +56,9 @@ const BlogPosts = {
     });
   },
   delete: function(id) {
-    const postIndex = this.posts.findIndex((post) => {
-      post.id === id;
-    });
+
+    // check if id exists in data set
+    const postIndex = this.posts.findIndex(post => post.id === id);
     if (postIndex > -1) {
       const deleted = this.posts.splice(postIndex, 1);
       return deleted[0];
