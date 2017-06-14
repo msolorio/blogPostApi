@@ -10,12 +10,6 @@ const { BlogPosts } = require('../models');
 // instantiate router with express
 const router = express.Router();
 
-BlogPosts.create({
-  "title": "Chicken Soup for the Developer Soul",
-  "author": "Sved Svenson",
-  "content": "once upon a time ..."
-});
-
 router.get('/', (request, response) => {
   blogPosts = BlogPosts.get();
   response.status(200).json(blogPosts);

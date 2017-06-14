@@ -19,13 +19,21 @@ describe('Blog Posts', function() {
     return closeServer();
   });
 
+  // before each test we add one blog post
   beforeEach(function() {
     BlogPosts.create({title: 'blog post1', author: 'sam', content: 'some content'});
   });
 
   afterEach(function() {
-    blogPosts = BlogPosts.get();
-    BlogPosts.delete(blogPosts[0].id);
+    allPosts = BlogPosts.get();
+
+    const idsToDelete = allPosts.map(function(post) {
+      return post.id;
+    });
+
+    idsToDelete.forEach(function(id) {
+      BlogPosts.delete(id);
+    });
   });
 
   // each it has it's own .then
@@ -39,7 +47,7 @@ describe('Blog Posts', function() {
         res.should.be.json;
         res.body.should.be.a('array');
 
-        res.body.length.should.be.at.least(1);
+        res.body.length.should.equal(1);
       });
   });
 
@@ -58,9 +66,27 @@ describe('Blog Posts', function() {
 
         res.body.should.include.keys('id', 'title', 'content', 'author', 'publishDate');
         res.body.id.should.not.be.null;
-
         res.body.should.deep.equal(Object.assign(newBlogPost, {id: res.body.id, publishDate: res.body.publishDate}));
+
+        return chai.request(app)
+          .get('/blog-posts')
+          .then(function(res) {
+            res.body.length.should.equal(2);
+          });
       });
+  });
+
+  it('should return an error with missing title on POST', function() {
+
+    const newBlogPost = {author: 'Jon', content: 'some content for incomplete POST request'};
+
+    return chai.request(app)
+      .post('/blog-posts')
+      .send(newBlogPost)
+      .catch(function(error) {
+        error.should.have.status(400);
+      });
+      
   });
 
   it('should update blog post on PUT', function() {
@@ -79,8 +105,32 @@ describe('Blog Posts', function() {
             res.body.should.include.keys('id', 'title', 'author', 'content', 'publishDate');
             res.body.id.should.not.be.null;
             res.body.should.deep.equal(Object.assign(blogPostUpdate, {publishDate: res.body.publishDate}));
+
+            return chai.request(app)
+              .get('/blog-posts')
+              .then(function(res) {
+                res.body.length.should.equal(1);
+              });
           });
       })
+  });
+
+  it('should return an error with missing id on PUT request', function() {
+
+    const blogPostUpdate = {title: 'blog post3', author: 'kim', content: 'updated content', id: 'abcd'};
+
+      // return chai.request(app)
+      //   .put(`/blog-posts/`)
+      //   .send(blogPostUpdate)
+      //   .should.throw(Error);
+
+      return chai.request(app)
+        .put('/blog-posts/abcd')
+        .send(blogPostUpdate)
+        .catch(function(error) {
+          error.should.have.status(400);
+        });
+        
   });
 
   it('should remove item on DELETE', function() {
@@ -98,6 +148,12 @@ describe('Blog Posts', function() {
           res.body.should.include.keys('id', 'title', 'author', 'content', 'publishDate');
           res.body.id.should.not.be.null;
           res.body.should.deep.equal(objectToDelete);
+
+          return chai.request(app)
+            .get('/blog-posts')
+            .then(function(res) {
+              res.body.length.should.equal(0);
+            });
         });  
     });
   });
