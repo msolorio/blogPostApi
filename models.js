@@ -27,6 +27,7 @@ const BlogPosts = {
     // return first non existant required field in newPost
     const missingField = requiredFields.find(field => !newPost[field]);
 
+    // check if required field exists
     if (missingField) {
       throw new StorageException(`\`${missingField}\` is missing from request body.`);
     }
@@ -57,8 +58,10 @@ const BlogPosts = {
   },
   delete: function(id) {
 
-    // check if id exists in data set
+    // get index of post with matching id
     const postIndex = this.posts.findIndex(post => post.id === id);
+
+    // check if id exists in data set
     if (postIndex > -1) {
       const deleted = this.posts.splice(postIndex, 1);
       return deleted[0];
@@ -69,7 +72,7 @@ const BlogPosts = {
   update: function(postFromRequest, routeParamId) {
     console.log('routeParamId:', routeParamId);
 
-    // if id in postFromRequest check if matches routeParamId
+    // if id is in postFromRequest check if matches routeParamId
     if (postFromRequest.id && (postFromRequest.id !== routeParamId)) {
       throw new StorageException(`id from request body and id from route param do not match`);
     }
