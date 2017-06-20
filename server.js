@@ -48,7 +48,6 @@ function closeServer() {
 // we do this in dev and in production
 
 // however this will not run when running our integration tests
-// where we import the runServer and closeServer functions directly to our test files
 if (require.main === module) {
   runServer().catch((err) => {
     console.log(err)

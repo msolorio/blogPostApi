@@ -1,4 +1,5 @@
 const chai = require('chai');
+
 const chaiHttp = require('chai-http');
 
 const { app, runServer, closeServer } = require('../server');
@@ -85,9 +86,11 @@ describe('Blog Posts', function() {
       .send(newBlogPost)
       .catch(function(error) {
         error.should.have.status(400);
+        // using json parse
+        JSON.parse(error.response.text).message.should.equal('`title` is missing from request body.')
       });
-      
   });
+  
 
   it('should update blog post on PUT', function() {
     return chai.request(app)
@@ -118,11 +121,6 @@ describe('Blog Posts', function() {
   it('should return an error with missing id on PUT request', function() {
 
     const blogPostUpdate = {title: 'blog post3', author: 'kim', content: 'updated content', id: 'abcd'};
-
-      // return chai.request(app)
-      //   .put(`/blog-posts/`)
-      //   .send(blogPostUpdate)
-      //   .should.throw(Error);
 
       return chai.request(app)
         .put('/blog-posts/abcd')
